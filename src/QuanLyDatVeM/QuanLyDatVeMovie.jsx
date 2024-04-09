@@ -1,5 +1,9 @@
-import React from "react";
-
+import { useSelector, useDispatch } from "react-redux";
+import {
+  setUsername,
+  setNumSeats,
+  setSeats,
+} from "../QuanLyDatVeM/slice/seat.js";
 const QuanLyDatVeMovie = () => {
   const arrGhe = [
     {
@@ -190,28 +194,33 @@ const QuanLyDatVeMovie = () => {
       ],
     },
   ];
-  const render = () => {
-    let newArrGhe = [...arrGhe];
+  console.log(arrGhe);
+  const username = useSelector((state) => state.seat.username);
+  const numSeats = useSelector((state) => state.seat.numSeats);
+  const seats = useSelector((state) => state.seat.seats);
+  const dispatch = useDispatch();
 
-    newArrGhe.map((item) => {
-      console.log(item);
-      console.log(item.hang);
+  const handleInputChange = (event) => {
+    dispatch(setUsername(event.target.value));
+  };
 
-      item.danhSachGhe.map((item, index) => {
-        console.log(item.soGhe);
-        // console.log(index);
-        // return (
-        //   <tr key={index}>
-        //     <td className="rowNumber">{item.soGhe}</td>
-        //   </tr>
-        // );
-        return item.soGhe;
-      });
-    });
+  const handleNumSeatsChange = (event) => {
+    dispatch(setNumSeats(event.target.value));
+  };
+
+  const handleSeatClick = (seatNumber) => {
+    if (seats.includes(seatNumber)) {
+      dispatch(setSeats(seats.filter((seat) => seat !== seatNumber)));
+    } else if (seats.length < numSeats) {
+      dispatch(setSeats([...seats, seatNumber]));
+    }
   };
   return (
     <div
-      style={{ backgroundImage: `url(./bgmovie.jpg)`, backgroundSize: "cover" }}
+      style={{
+        backgroundImage: `url(./bgmovie.jpg)`,
+        backgroundSize: "cover",
+      }}
       className="bookingMovie"
     >
       <h1> Movie Seat Selection</h1>
@@ -225,13 +234,24 @@ const QuanLyDatVeMovie = () => {
                 <label>
                   Name <span>*</span>
                 </label>
-                <input type="text" id="Username" required />
+                <input
+                  type="text"
+                  id="Username"
+                  required
+                  onChange={handleInputChange}
+                />
               </div>
               <div className="inputStart_right">
                 <label>
                   Number of Seats <span>*</span>
                 </label>
-                <input type="number" id="Numseats" required min="1" />
+                <input
+                  type="number"
+                  id="Numseats"
+                  required
+                  min="1"
+                  onChange={handleNumSeatsChange}
+                />
               </div>
             </div>
             <button>Start Selecting</button>
@@ -242,25 +262,86 @@ const QuanLyDatVeMovie = () => {
           <li className="seatLi seatRed">Reserved Seat</li>
           <li className="seatLi seatWhite">Empty Seat</li>
         </ul>
-        <table>
+        <table style={{ overflowX: "auto" }}>
           <tbody>
-            <tr>
-              {render()}
-              <td className="rowNumber"></td>
+            <tr className="rowNumber">
+              <td></td>
+              {arrGhe[0].danhSachGhe.map((ghe) => (
+                <td key={ghe.soGhe}>{ghe.soGhe}</td>
+              ))}
             </tr>
+            {arrGhe.slice(1).map((hang) => (
+              <tr key={hang.hang}>
+                <td className="firstChar">{hang.hang}</td>
+                {hang.danhSachGhe.map((ghe) => (
+                  <td
+                    key={ghe.soGhe}
+                    className={`ghe ${
+                      seats.includes(ghe.soGhe)
+                        ? "Seat"
+                        : ghe.daDats
+                        ? "bookedSeat"
+                        : ""
+                    }`}
+                    onClick={() => handleSeatClick(ghe.soGhe)}
+                  >
+                    {seats.includes(ghe.soGhe)
+                      ? ""
+                      : ghe.daDat
+                      ? ""
+                      : ghe.soGhe}
+                  </td>
+                ))}
+              </tr>
+            ))}
           </tbody>
         </table>
-      </div>
+        <h2 className="creenApp"> SCREEN THIS WAY</h2>
+        <button className="btn-in">Confirm Selection</button>
 
-      {/* </div> */}
-      {/* // <div className="bookingMovie"> */}
-      {/* <div className="ghe"></div>
-      <div className="rowNumber"></div>
-      <div className="firstChar"></div>
-      <div className="screen"></div>
-      <div className="5"></div>
-      <div className="gheDuocChon"></div>
-      <div className="gheDangChon"></div> */}
+        {/* table */}
+
+        <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+          <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+              <tr>
+                <th scope="col" className="px-6 py-3">
+                  Name
+                </th>
+                <th scope="col" className="px-6 py-3">
+                  Number of Seats
+                </th>
+                <th scope="col" className="px-6 py-3">
+                  Seats
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                <th
+                  scope="row"
+                  className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                >
+                  {username}
+                </th>
+                <th
+                  scope="row"
+                  className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                >
+                  {" "}
+                  {numSeats}
+                </th>
+                <th
+                  scope="row"
+                  className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                >
+                  {seats.join(", ")}
+                </th>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };
